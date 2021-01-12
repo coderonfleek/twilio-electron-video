@@ -29,7 +29,9 @@
       const room = process.env.ROOM_NAME;
       console.log(token)
 
-      createLocalVideoTrack().then(track => {
+      createLocalVideoTrack({
+        video : {width : 250}
+      }).then(track => {
         const localMediaContainer = document.getElementById('my-feed');
         localMediaContainer.appendChild(track.attach());
       });
@@ -44,7 +46,7 @@
 
       createLocalTracks({
         audio: true,
-        video: { width: 250, height: 250 }
+        video: { width: 250 }
       }).then(localTracks => {
         return connect(token, {
           name: room,
@@ -60,7 +62,7 @@
           participant.tracks.forEach(publication => {
             if (publication.isSubscribed) {
               const track = publication.track;
-              document.getElementById('remote-media-div').appendChild(track.attach());
+              document.getElementById('remote-feeds').appendChild(track.attach());
             }
           });
 
