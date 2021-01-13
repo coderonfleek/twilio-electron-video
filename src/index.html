@@ -55,6 +55,20 @@
       }).then(room => {
         console.log(`Connected to Room: ${room.name}`);
 
+        //Add partcipants already in the room
+        room.participants.forEach(participant => {
+          participant.tracks.forEach(publication => {
+            if (publication.track) {
+              document.getElementById('remote-feeds').appendChild(publication.track.attach());
+            }
+          });
+
+          participant.on('trackSubscribed', track => {
+            document.getElementById('remote-feeds').appendChild(track.attach());
+          });
+        });
+
+
         //Add participants as they come in
         room.on('participantConnected', participant => {
           console.log(`Participant "${participant.identity}" connected`);
