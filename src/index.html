@@ -9,6 +9,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-4">
+          <button class="btn btn-danger" type="button" onclick="disconnectFromRoom()">Leave Room</button>
           <div id="my-feed">
 
           </div>
@@ -26,7 +27,8 @@
       const { connect, createLocalTracks, createLocalVideoTrack } = require('twilio-video');
 
       const token = process.env.ACCESS_TOKEN;
-      const room = process.env.ROOM_NAME;
+      const room_name = process.env.ROOM_NAME;
+      const video_room;
       console.log(token)
 
       createLocalVideoTrack({
@@ -49,11 +51,14 @@
         video: { width: 250 }
       }).then(localTracks => {
         return connect(token, {
-          name: room,
+          name: room_name,
           tracks: localTracks
         });
       }).then(room => {
         console.log(`Connected to Room: ${room.name}`);
+
+        //Get reference to room
+        video_room = room;
 
         //Add partcipants already in the room
         room.participants.forEach(participant => {
@@ -94,6 +99,11 @@
 
 
       });
+
+      function disconnectFromRoom() {
+        video_room.disconnect();
+        console.log(`You disconnected from Room ${video_room.name}`);
+      }
 
 
 
