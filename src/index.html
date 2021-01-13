@@ -85,6 +85,14 @@
           });
         });
 
+        //Remove disconnected participants
+        room.on('participantDisconnected', participant => {
+          
+          console.log(`Participant ${participant.identity} disconnected.`);
+          document.getElementById(participant.sid).remove();
+        });
+
+
       });
 
 
