@@ -81,16 +81,18 @@
           const participantContainer = document.createElement('div');
           participantContainer.id = participant.sid;
 
-          participantContainer.innerHTML = track.attach();
+          
 
           participant.tracks.forEach(publication => {
             if (publication.isSubscribed) {
               const track = publication.track;
+              participantContainer.innerHTML = track.attach();
               document.getElementById('remote-feeds').appendChild(participantContainer);
             }
           });
 
           participant.on('trackSubscribed', track => {
+            participantContainer.innerHTML = track.attach();
             document.getElementById('remote-feeds').appendChild(participantContainer);
           });
         });
