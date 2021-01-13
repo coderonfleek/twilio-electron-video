@@ -6,17 +6,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css" integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
   </head>
   <body>
-    <div class="container">
+    <div class="container pt-5">
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4" style="border-right: 1px solid;">
           
-
+          <h5 class="card-title">Your Feed</h5>
           <div class="card" style="width: 18rem;">
             <div id="my-feed">
               
             </div>
             <div class="card-body">
-              <h5 class="card-title">You Feed</h5>
+              <div id="connection-message"></div>
               
               <button class="btn btn-primary" id="join-call">Join Call</button>
               <button class="btn btn-danger" id="end-call" type="button" onclick="disconnectFromRoom()">End Call</button>
@@ -24,7 +24,8 @@
           </div>
           
         </div>
-        <div class="col-md-6">
+        <div class="col-md-8">
+          <h5 class="card-title">Caller's Feed</h5>
           <div id="remote-feeds">
 
           </div>
@@ -42,6 +43,7 @@
       
       let joinCallBtn = document.getElementById("join-call");
       let endCallBtn = document.getElementById("end-call");
+      let connectionMessage = document.getElementById("connection-message");
 
       endCallBtn.disabled = true;
 
@@ -55,6 +57,9 @@
       joinCallBtn.onclick = joinCall;
 
       function joinCall(params) {
+
+        connectionMessage.innerHTML = `<p class='text-primary'>Connecting...</p>`;
+
         createLocalTracks({
           audio: true,
           video: { width: 400 }
@@ -70,6 +75,7 @@
           video_room = room;
           joinCallBtn.disabled = true;
           endCallBtn.disabled = false;
+          connectionMessage.innerHTML = `<p class='text-success'>Connected</p>`;
 
           //Add partcipants already in the room
           room.participants.forEach(participant => {
@@ -133,6 +139,7 @@
 
         joinCallBtn.disabled = false;
         endCallBtn.disabled = true;
+        connectionMessage.innerHTML = `<p class='text-danger'>Disconnected</p>`
       }
 
 
