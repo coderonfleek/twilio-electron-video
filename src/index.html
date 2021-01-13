@@ -78,15 +78,20 @@
         room.on('participantConnected', participant => {
           console.log(`Participant "${participant.identity}" connected`);
 
+          const participantContainer = document.createElement('div');
+          participantContainer.id = participant.sid;
+
+          participantContainer.innerHTML = track.attach();
+
           participant.tracks.forEach(publication => {
             if (publication.isSubscribed) {
               const track = publication.track;
-              document.getElementById('remote-feeds').appendChild(track.attach());
+              document.getElementById('remote-feeds').appendChild(participantContainer);
             }
           });
 
           participant.on('trackSubscribed', track => {
-            document.getElementById('remote-feeds').appendChild(track.attach());
+            document.getElementById('remote-feeds').appendChild(participantContainer);
           });
         });
 
