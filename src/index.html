@@ -62,14 +62,19 @@
 
         //Add partcipants already in the room
         room.participants.forEach(participant => {
+
+          const existingParticipantContainer = document.createElement('div');
+          existingParticipantContainer.id = participant.sid;
           participant.tracks.forEach(publication => {
             if (publication.track) {
-              document.getElementById('remote-feeds').appendChild(publication.track.attach());
+              existingParticipantContainer.appendChild(publication.track.attach())
+              document.getElementById('remote-feeds').appendChild(existingParticipantContainer);
             }
           });
 
           participant.on('trackSubscribed', track => {
-            document.getElementById('remote-feeds').appendChild(track.attach());
+            existingParticipantContainer.appendChild(track.attach());
+            document.getElementById('remote-feeds').appendChild(existingParticipantContainer);
           });
         });
 
@@ -86,13 +91,13 @@
           participant.tracks.forEach(publication => {
             if (publication.isSubscribed) {
               const track = publication.track;
-              participantContainer.innerHTML = track.attach();
+              participantContainer.appendChild(track.attach());
               document.getElementById('remote-feeds').appendChild(participantContainer);
             }
           });
 
           participant.on('trackSubscribed', track => {
-            participantContainer.innerHTML = track.attach();
+            participantContainer.appendChild(track.attach());
             document.getElementById('remote-feeds').appendChild(participantContainer);
           });
         });
