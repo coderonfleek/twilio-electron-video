@@ -8,13 +8,23 @@
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-md-4">
-          <button class="btn btn-danger" type="button" onclick="disconnectFromRoom()">Leave Room</button>
-          <div id="my-feed">
+        <div class="col-md-6">
+          
 
+          <div class="card" style="width: 18rem;">
+            <div id="my-feed">
+              
+            </div>
+            <div class="card-body">
+              <h5 class="card-title">You Feed</h5>
+              
+              <button class="btn btn-primary" id="join-call">Join Call</button>
+              <button class="btn btn-danger" id="end-call" type="button" onclick="disconnectFromRoom()">End Call</button>
+            </div>
           </div>
+          
         </div>
-        <div class="col-md-8">
+        <div class="col-md-6">
           <div id="remote-feeds">
 
           </div>
@@ -29,92 +39,100 @@
       const token = process.env.ACCESS_TOKEN;
       const room_name = process.env.ROOM_NAME;
       let video_room;
-      console.log(token)
+      
+      let joinCallBtn = document.getElementById("join-call");
+      let endCallBtn = document.getElementById("end-call");
+
+      endCallBtn.disabled = true;
 
       createLocalVideoTrack({
-        video : {width : 250}
+        width : 280
       }).then(track => {
         const localMediaContainer = document.getElementById('my-feed');
         localMediaContainer.appendChild(track.attach());
       });
 
-      /* connect(token, {
-        audio: true,
-        name: room,
-        video: { width: 250 }
-      }).then(room => {
-        console.log(`Connected to Room: ${room.name}`);
-      }); */
+      joinCallBtn.onclick = joinCall;
 
-      createLocalTracks({
-        audio: true,
-        video: { width: 250 }
-      }).then(localTracks => {
-        return connect(token, {
-          name: room_name,
-          tracks: localTracks
-        });
-      }).then(room => {
-        console.log(`Connected to Room: ${room.name}`);
+      function joinCall(params) {
+        createLocalTracks({
+          audio: true,
+          video: { width: 400 }
+        }).then(localTracks => {
+          return connect(token, {
+            name: room_name,
+            tracks: localTracks
+          });
+        }).then(room => {
+          console.log(`Connected to Room: ${room.name}`);
 
-        //Get reference to room
-        video_room = room;
+          //Get reference to room
+          video_room = room;
+          joinCallBtn.disabled = true;
+          endCallBtn.disabled = false;
 
-        //Add partcipants already in the room
-        room.participants.forEach(participant => {
+          //Add partcipants already in the room
+          room.participants.forEach(participant => {
 
-          const existingParticipantContainer = document.createElement('div');
-          existingParticipantContainer.id = participant.sid;
-          participant.tracks.forEach(publication => {
-            if (publication.track) {
-              existingParticipantContainer.appendChild(publication.track.attach())
+            const existingParticipantContainer = document.createElement('div');
+            existingParticipantContainer.id = participant.sid;
+            participant.tracks.forEach(publication => {
+              if (publication.track) {
+                existingParticipantContainer.appendChild(publication.track.attach())
+                document.getElementById('remote-feeds').appendChild(existingParticipantContainer);
+              }
+            });
+
+            participant.on('trackSubscribed', track => {
+              existingParticipantContainer.appendChild(track.attach());
               document.getElementById('remote-feeds').appendChild(existingParticipantContainer);
-            }
+            });
           });
 
-          participant.on('trackSubscribed', track => {
-            existingParticipantContainer.appendChild(track.attach());
-            document.getElementById('remote-feeds').appendChild(existingParticipantContainer);
-          });
-        });
 
+          //Add participants as they come in
+          room.on('participantConnected', participant => {
+            console.log(`Participant "${participant.identity}" connected`);
 
-        //Add participants as they come in
-        room.on('participantConnected', participant => {
-          console.log(`Participant "${participant.identity}" connected`);
+            const participantContainer = document.createElement('div');
+            participantContainer.id = participant.sid;
 
-          const participantContainer = document.createElement('div');
-          participantContainer.id = participant.sid;
+            
 
-          
+            participant.tracks.forEach(publication => {
+              if (publication.isSubscribed) {
+                const track = publication.track;
+                participantContainer.appendChild(track.attach());
+                document.getElementById('remote-feeds').appendChild(participantContainer);
+              }
+            });
 
-          participant.tracks.forEach(publication => {
-            if (publication.isSubscribed) {
-              const track = publication.track;
+            participant.on('trackSubscribed', track => {
               participantContainer.appendChild(track.attach());
               document.getElementById('remote-feeds').appendChild(participantContainer);
-            }
+            });
           });
 
-          participant.on('trackSubscribed', track => {
-            participantContainer.appendChild(track.attach());
-            document.getElementById('remote-feeds').appendChild(participantContainer);
+          //Remove disconnected participants
+          room.on('participantDisconnected', participant => {
+            
+            console.log(`Participant ${participant.identity} disconnected.`);
+            document.getElementById(participant.sid).remove();
           });
+
+
         });
-
-        //Remove disconnected participants
-        room.on('participantDisconnected', participant => {
-          
-          console.log(`Participant ${participant.identity} disconnected.`);
-          document.getElementById(participant.sid).remove();
-        });
+      }
 
 
-      });
+      
 
       function disconnectFromRoom() {
         video_room.disconnect();
         console.log(`You disconnected from Room ${video_room.name}`);
+
+        joinCallBtn.disabled = false;
+        endCallBtn.disabled = true;
       }
 
 
